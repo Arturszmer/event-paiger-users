@@ -1,14 +1,14 @@
 package com.eventpaiger.common;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 
-import javax.persistence.Column;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
 import java.time.LocalDateTime;
 
 @MappedSuperclass
@@ -18,7 +18,7 @@ public abstract class EntityLog {
     @CreatedBy
     protected String createdBy;
 
-    @Column(name = "LAST_MODIFIED", updatable = true)
+    @Column(name = "LAST_MODIFIED")
     @LastModifiedBy
     protected String modifiedBy;
 
@@ -26,7 +26,7 @@ public abstract class EntityLog {
     @CreatedDate
     protected LocalDateTime creationTimestamp;
 
-    @Column(name = "MODIFICATION_TIMESTAMP", updatable = true)
+    @Column(name = "MODIFICATION_TIMESTAMP")
     @LastModifiedDate
     protected LocalDateTime modificationTimestamp;
 //
