@@ -3,6 +3,8 @@ package com.eventpaiger.user.assembler;
 import com.eventpaiger.dto.UserProfileDto;
 import com.eventpaiger.user.model.UserProfile;
 
+import java.util.UUID;
+
 public class UserProfileAssembler {
 
     public static UserProfileDto toDto(UserProfile userProfile){
@@ -12,6 +14,9 @@ public class UserProfileAssembler {
                 userProfile.getEventOrganizerId());
     }
 
-//    public static UserProfile toEntity(UserProfileDto dto){
-//    }
+    public static UserProfile toEntity(UserProfileDto userProfileDto) {
+        return new UserProfile(
+                userProfileDto.username(), userProfileDto.email(), UUID.randomUUID()
+        );
+    }
 }
