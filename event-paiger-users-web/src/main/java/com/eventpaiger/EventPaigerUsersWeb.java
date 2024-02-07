@@ -8,4 +8,5 @@ public class EventPaigerUsersWeb {
     public static void main(String[] args) {
         SpringApplication.run(EventPaigerUsersWeb.class, args);
     }
+
 }

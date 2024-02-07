@@ -1,0 +1,35 @@
+package com.eventpaiger.user.model;
+
+import com.eventpaiger.common.BaseEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.List;
+
+@Entity
+@Table(name = "role")
+@Getter
+@Setter
+@NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
+public class Role extends BaseEntity<Long> {
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "name")
+    private RoleType name;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "permission")
+    private List<Permission> permission;
+
+    public Role(RoleType name) {
+        this.name = name;
+    }
+}

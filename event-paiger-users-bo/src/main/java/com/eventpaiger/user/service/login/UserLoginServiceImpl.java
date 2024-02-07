@@ -19,7 +19,7 @@ public class UserLoginServiceImpl implements UserLoginService {
 
     @Override
     public UserProfileDto hello() {
-        UserProfile artek = new UserProfile("Artur", "artek@gmail.com", UUID.randomUUID());
+        UserProfile artek = UserProfile.forEvent("Artur", "artek@gmail.com", UUID.randomUUID());
         return toDto(artek);
     }
 
@@ -28,4 +28,6 @@ public class UserLoginServiceImpl implements UserLoginService {
         UserProfile entity = UserProfileAssembler.toEntity(userProfileDto);
         return toDto(repository.save(entity));
     }
+
+
 }
