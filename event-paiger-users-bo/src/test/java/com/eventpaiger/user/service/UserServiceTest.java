@@ -21,6 +21,7 @@ class UserServiceTest {
     public void should_return_false() {
         // given
         assertTrue(userService.changePassword());
+        // git
 
         // when
 
