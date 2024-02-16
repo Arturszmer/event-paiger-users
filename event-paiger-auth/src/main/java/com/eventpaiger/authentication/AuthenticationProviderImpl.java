@@ -2,6 +2,7 @@ package com.eventpaiger.authentication;
 
 import com.eventpaiger.user.model.UserProfile;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class AuthenticationProviderImpl implements AuthenticationProvider {
 
     private final UserDetailsService userDetailsService;
@@ -24,7 +26,8 @@ public class AuthenticationProviderImpl implements AuthenticationProvider {
             return new UsernamePasswordAuthenticationToken(
                     userDetails, userDetails.getPassword(), userDetails.getAuthorities());
         } else {
-            return null;
+            log.warn("LOGIN FAILED");
+            throw new RuntimeException("LOGIN FAILED");
         }
     }
 
