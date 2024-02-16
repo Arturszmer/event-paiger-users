@@ -28,9 +28,15 @@ public class Role extends BaseEntity<Long> {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "permission")
-    private List<Permission> permission = new ArrayList<>();
+    private List<Permission> permissions = new ArrayList<>();
 
     public Role(RoleType name) {
         this.name = name;
+        if(name != RoleType.OBSERVER){
+            permissions.addAll(List.of(
+                    Permission.EVENT_UPDATE,
+                    Permission.EVENT_DELETE,
+                    Permission.EVENT_CREATE));
+        }
     }
 }

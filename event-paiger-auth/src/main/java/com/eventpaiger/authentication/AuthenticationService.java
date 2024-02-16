@@ -29,7 +29,7 @@ public class AuthenticationService {
     private final JwtService jwtService;
 
     public AuthenticationResponse register(RegistrationRequest request){
-        UserProfile userProfile = UserProfile.forRegistration(
+        UserProfile userProfile = UserProfile.createForRegistration(
                 request.username(), request.email(), passwordEncoder.encode(request.password())
         );
 
@@ -45,11 +45,6 @@ public class AuthenticationService {
 
     }
 
-    private void saveToken(String generatedToken, UserProfile savedUser) {
-        Token token = Token.generateToken(savedUser, generatedToken);
-        tokenRepository.save(token);
-    }
-
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -63,6 +58,11 @@ public class AuthenticationService {
         saveToken(generatedToken, user);
 
         return new AuthenticationResponse(generatedToken, refreshToken);
+    }
+
+    private void saveToken(String generatedToken, UserProfile savedUser) {
+        Token token = Token.generateToken(savedUser, generatedToken);
+        tokenRepository.save(token);
     }
 
     private void revokeAllUserTokens(UserProfile user) {

@@ -15,7 +15,7 @@ public class UserProfileAssembler {
     }
 
     public static UserProfile toEntity(UserProfileDto userProfileDto) {
-        return UserProfile.forEvent(
+        return UserProfile.createForEvent(
                 userProfileDto.username(), userProfileDto.email(), UUID.randomUUID()
         );
     }

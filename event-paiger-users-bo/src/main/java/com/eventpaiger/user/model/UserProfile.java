@@ -68,15 +68,15 @@ public class UserProfile extends BaseEntity<Long> implements UserDetails {
         addRole(new Role(RoleType.OBSERVER));
     }
 
-    public static UserProfile forEvent(String username,
-                                       String email,
-                                       UUID eventOrganizerId){
+    public static UserProfile createForEvent(String username,
+                                             String email,
+                                             UUID eventOrganizerId){
         return new UserProfile(username, email, eventOrganizerId);
     }
 
-    public static UserProfile forRegistration(String username,
-                                              String email,
-                                              String password){
+    public static UserProfile createForRegistration(String username,
+                                                    String email,
+                                                    String password){
         return new UserProfile(username, email, password);
     }
 
@@ -87,7 +87,7 @@ public class UserProfile extends BaseEntity<Long> implements UserDetails {
                 .flatMap(role -> Stream.concat(
                         Stream.of(new SimpleGrantedAuthority(
                                 "ROLE_" + role.getName())),
-                        role.getPermission().stream()
+                        role.getPermissions().stream()
                                 .map(permission ->
                                         new SimpleGrantedAuthority(permission.getName())))
                 )
