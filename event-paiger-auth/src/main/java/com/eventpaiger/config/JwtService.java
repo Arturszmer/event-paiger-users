@@ -3,7 +3,6 @@ package com.eventpaiger.config;
 import com.eventpaiger.user.model.UserProfile;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,10 +17,17 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    private final String PUBLIC_KEY;
+    private final RsaKeyProperties rsaKeys;
+    private final long jwtExpiration;
+    private final long refreshTokenTime;
 
-    public JwtService(@Value("${spring.security.oauth2.resourceserver.jwt.public-key-location}") String publicKey) {
-        this.PUBLIC_KEY = publicKey;
+
+    public JwtService(RsaKeyProperties keyProperties,
+                      @Value("${application.security.jwt.expiration}") long jwtExpiration,
+                      @Value("${application.security.jwt.refresh}") long refreshTokenTime) {
+        this.rsaKeys = keyProperties;
+        this.jwtExpiration = jwtExpiration;
+        this.refreshTokenTime = refreshTokenTime;
     }
 
     public String extractUsername(String token){
@@ -59,18 +65,29 @@ public class JwtService {
     }
 
     public String generateToken(UserProfile userProfile, Map<String, Object> extraClaims){
+        return buildToken(userProfile, extraClaims, jwtExpiration);
+    }
+
+    public String generateRefreshToken(UserProfile savedUser) {
+        return buildToken(savedUser, new HashMap<>(), refreshTokenTime);
+    }
+
+    private String buildToken(UserProfile userProfile,
+                              Map<String, Object> extraClaims,
+                              long expiration) {
         Date generationDate = new Date(System.currentTimeMillis());
         return Jwts.builder()
                 .claims().add(extraClaims).and()
                 .subject(userProfile.getUsername())
                 .issuedAt(generationDate)
-                .expiration(new Date(generationDate.getTime() + 24*60*1000))
+                .expiration(new Date(generationDate.getTime() + expiration))
                 .signWith(getSigningKey())
                 .compact();
     }
 
     private SecretKey getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(PUBLIC_KEY);
+        byte[] keyBytes = rsaKeys.publicKey().getEncoded();
         return Keys.hmacShaKeyFor(keyBytes);
     }
+
 }

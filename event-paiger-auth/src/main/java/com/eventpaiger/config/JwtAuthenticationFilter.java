@@ -36,7 +36,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         jwtToken = authHeader.replace("Bearer ", "");
-        usernameOrEmail = jwtService.extractUsername(jwtToken); // extract from JWT
+        usernameOrEmail = jwtService.extractUsername(jwtToken);
         if(usernameOrEmail != null && SecurityContextHolder.getContext().getAuthentication() == null){
             UserDetails userDetails = userDetailsService.loadUserByUsername(usernameOrEmail);
             if(jwtService.isValid(jwtToken, userDetails)){

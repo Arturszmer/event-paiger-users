@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -27,7 +28,7 @@ public class Role extends BaseEntity<Long> {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "permission")
-    private List<Permission> permission;
+    private List<Permission> permission = new ArrayList<>();
 
     public Role(RoleType name) {
         this.name = name;
