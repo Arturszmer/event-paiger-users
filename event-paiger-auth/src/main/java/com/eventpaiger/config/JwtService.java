@@ -21,7 +21,6 @@ public class JwtService {
     private final long jwtExpiration;
     private final long refreshTokenTime;
 
-
     public JwtService(RsaKeyProperties keyProperties,
                       @Value("${application.security.jwt.expiration}") long jwtExpiration,
                       @Value("${application.security.jwt.refresh}") long refreshTokenTime) {
@@ -41,7 +40,8 @@ public class JwtService {
 
     public boolean isValid(String token, UserDetails user){
         String username = extractUsername(token);
-        return username.equals(user.getUsername()) && !isTokenExpired(token);
+        boolean isUsernameValid = username.equals(user.getUsername());
+        return isUsernameValid && !isTokenExpired(token);
     }
 
     private boolean isTokenExpired(String token) {

@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface TokenRepository extends JpaRepository<Token, Long> {
@@ -16,4 +17,6 @@ public interface TokenRepository extends JpaRepository<Token, Long> {
             "on t.userProfile.id = up.id " +
             "where up.id = :userId and (t.expired = false or t.revoked = false)")
     List<Token> findAllValidTokens(@Param("userId") long userId);
+
+    Optional<Token> findByToken(String jwtToken);
 }
