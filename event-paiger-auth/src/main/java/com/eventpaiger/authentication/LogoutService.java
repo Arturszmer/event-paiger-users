@@ -1,7 +1,7 @@
 package com.eventpaiger.authentication;
 
 import com.eventpaiger.config.JwtService;
-import com.eventpaiger.config.SecurityContextHelper;
+import com.eventpaiger.security.SecurityContextHelper;
 import com.eventpaiger.user.repository.TokenRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

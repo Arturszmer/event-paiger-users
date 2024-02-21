@@ -117,4 +117,8 @@ public class UserProfile extends BaseEntity<Long> implements UserDetails {
     public void addRole(Role role){
        this.roles.add(role);
     }
+
+    public void setNewPassword(String newPassword) {
+        password = newPassword;
+    }
 }
