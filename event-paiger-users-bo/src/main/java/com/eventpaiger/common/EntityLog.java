@@ -1,5 +1,6 @@
 package com.eventpaiger.common;
 
+import com.eventpaiger.security.SecurityContextHelper;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
@@ -33,15 +34,15 @@ public abstract class EntityLog {
     @PrePersist
     public void prePersist(){
     // TODO: uzupełnić gdy będzie już implementacja Spring Security
-        this.createdBy = "admin";
-        this.modifiedBy = "admin";
+        this.createdBy = SecurityContextHelper.getUsernameFromAuthenticatedUser();
+        this.modifiedBy = SecurityContextHelper.getUsernameFromAuthenticatedUser();
         this.creationTimestamp = LocalDateTime.now();
         this.modificationTimestamp = LocalDateTime.now();
     }
 
     @PreUpdate
     public void preUpdate(){
-        this.modifiedBy = "admin";
+        this.modifiedBy = SecurityContextHelper.getUsernameFromAuthenticatedUser();
         this.modificationTimestamp = LocalDateTime.now();
     }
 

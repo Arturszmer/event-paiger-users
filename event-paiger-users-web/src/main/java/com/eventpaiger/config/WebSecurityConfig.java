@@ -1,5 +1,6 @@
 package com.eventpaiger.config;
 
+import com.eventpaiger.security.SecurityContextHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
