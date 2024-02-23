@@ -18,6 +18,7 @@
         <module>event-paiger-users-api</module>
         <module>event-paiger-users-bo</module>
         <module>event-paiger-auth</module>
+        <module>event-paiger-user-security</module>
     </modules>
     <packaging>pom</packaging>
 

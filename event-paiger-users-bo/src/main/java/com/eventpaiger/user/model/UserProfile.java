@@ -8,7 +8,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -41,9 +40,6 @@ public class UserProfile extends BaseEntity<Long> implements UserDetails {
 
     @Column
     private String password;
-
-    @OneToMany(mappedBy = "userProfile")
-    private List<Token> tokens;
 
     @Column(unique = true, name = "event_organizer_id")
     private UUID eventOrganizerId;

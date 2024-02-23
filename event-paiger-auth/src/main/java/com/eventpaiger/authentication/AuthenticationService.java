@@ -5,7 +5,6 @@ import com.eventpaiger.dto.auth.AuthenticationRequest;
 import com.eventpaiger.dto.auth.AuthenticationResponse;
 import com.eventpaiger.dto.auth.RegistrationRequest;
 import com.eventpaiger.user.model.*;
-import com.eventpaiger.user.repository.TokenRepository;
 import com.eventpaiger.user.repository.UserProfileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,15 +14,12 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class AuthenticationService {
 
     private final UserProfileRepository userProfileRepository;
-    private final TokenRepository tokenRepository;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;

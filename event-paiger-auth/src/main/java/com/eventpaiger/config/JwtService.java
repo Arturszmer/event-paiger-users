@@ -1,9 +1,9 @@
 package com.eventpaiger.config;
 
-import com.eventpaiger.authentication.AuthenticationToken;
-import com.eventpaiger.authentication.JwtAuthenticationConverter;
-import com.eventpaiger.authentication.TokenClaims;
 import com.eventpaiger.user.model.UserProfile;
+import org.eventpaiger.auth.AuthenticationToken;
+import org.eventpaiger.auth.JwtAuthenticationConverter;
+import org.eventpaiger.auth.TokenClaims;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,15 +35,6 @@ public class JwtService {
     public AuthenticationToken decodeToken(String token){
         Jwt jwt = jwtDecoder.decode(token);
         return JwtAuthenticationConverter.convert(jwt);
-    }
-
-    public String extractUsername(String token){
-        return extractClaim(token, AuthenticationToken::getUsername);
-    }
-
-    public <T> T extractClaim(String token, Function<AuthenticationToken, T> resolver){
-        AuthenticationToken claims = decodeToken(token);
-        return resolver.apply(claims);
     }
 
     public TokenClaims getTokenClaims(AuthenticationToken authenticationToken) {

@@ -2,15 +2,14 @@ package com.eventpaiger.user.service;
 
 import com.eventpaiger.dto.auth.ChangePasswordRequest;
 import com.eventpaiger.dto.user.service.UserService;
-import com.eventpaiger.security.SecurityContextHelper;
 import com.eventpaiger.user.model.UserProfile;
 import com.eventpaiger.user.repository.UserProfileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.nio.file.attribute.UserPrincipalNotFoundException;
 import java.security.Principal;
 
 @Service
@@ -22,8 +21,11 @@ public class UserServiceImpl implements UserService {
     private final UserProfileRepository repository;
 
     @Override
-    public void changePassword(ChangePasswordRequest request, Principal principal) throws UserPrincipalNotFoundException {
-        UserProfile user = SecurityContextHelper.getUserFromAuthentication();
+    public void changePassword(ChangePasswordRequest request, Principal principal) {
+        String username = principal.getName();
+
+        UserProfile user = repository.findUserProfileByUsername(username)
+                .orElseThrow(() ->  new UsernameNotFoundException(String.format("User %s is not found", username)));
 
         isCurrentPasswordCorrect(request.currentPassword(), user);
         isNewPasswordMatches(request.newPassword(), request.confirmationPassword());

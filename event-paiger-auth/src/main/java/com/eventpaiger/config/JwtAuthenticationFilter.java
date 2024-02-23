@@ -1,13 +1,12 @@
 package com.eventpaiger.config;
 
-import com.eventpaiger.authentication.AuthenticationToken;
-import com.eventpaiger.authentication.TokenClaims;
-import com.eventpaiger.user.repository.TokenRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.eventpaiger.auth.AuthenticationToken;
+import org.eventpaiger.auth.TokenClaims;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,7 +24,6 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    private final TokenRepository tokenRepository;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
@@ -44,7 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if(authenticationToken != null && SecurityContextHolder.getContext().getAuthentication() == null){
             TokenClaims principal = jwtService.getTokenClaims(authenticationToken);
 
-            if(jwtService.isTokenExpired(authenticationToken) && isTokenValid(jwtToken)){
+            if(jwtService.isTokenExpired(authenticationToken)){
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         principal, null, principal.getAuthorities()
                 );
@@ -55,9 +53,4 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
     }
 
-    private boolean isTokenValid(String jwtToken) {
-        return tokenRepository.findByToken(jwtToken)
-                .map(token -> !token.expired && !token.revoked)
-                .orElse(false);
-    }
 }

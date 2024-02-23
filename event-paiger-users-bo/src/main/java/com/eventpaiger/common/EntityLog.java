@@ -1,10 +1,10 @@
 package com.eventpaiger.common;
 
-import com.eventpaiger.security.SecurityContextHelper;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
+import org.eventpaiger.auth.SecurityContextHelper;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
