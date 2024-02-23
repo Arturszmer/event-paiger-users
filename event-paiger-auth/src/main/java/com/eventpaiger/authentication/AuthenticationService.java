@@ -7,9 +7,6 @@ import com.eventpaiger.dto.auth.RegistrationRequest;
 import com.eventpaiger.user.model.*;
 import com.eventpaiger.user.repository.TokenRepository;
 import com.eventpaiger.user.repository.UserProfileRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,11 +15,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.List;
-
-import static com.eventpaiger.dto.auth.AuthConstants.STARTS_WITH_BEARER;
-import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 @Service
 @RequiredArgsConstructor
@@ -42,13 +35,12 @@ public class AuthenticationService {
 
         if(request.isOrganizer()){
             userProfile.addRole(new Role(RoleType.ORGANIZER));
+            userProfile.setEventOrganizerId();
         }
 
         UserProfile savedUser = userProfileRepository.save(userProfile);
         String generatedToken = jwtService.generateToken(savedUser);
-        String refreshedToken = jwtService.generateRefreshToken(savedUser);
-        saveToken(generatedToken, savedUser);
-        return new AuthenticationResponse(generatedToken, refreshedToken);
+        return new AuthenticationResponse(generatedToken);
 
     }
 
@@ -59,53 +51,8 @@ public class AuthenticationService {
 
         UserProfile user = findUser(request.usernameOrEmail());
         String generatedToken = jwtService.generateToken(user);
-        String refreshToken = jwtService.generateRefreshToken(user);
 
-        revokeAllUserTokens(user);
-        saveToken(generatedToken, user);
-
-        return new AuthenticationResponse(generatedToken, refreshToken);
-    }
-
-    public void refreshToken(HttpServletRequest request,
-                             HttpServletResponse response) throws IOException {
-        final String authHeader = request.getHeader(AUTHORIZATION);
-        final String refreshToken;
-        final String usernameOrEmail;
-        if(authHeader == null || !authHeader.startsWith(STARTS_WITH_BEARER)){
-            return;
-        }
-
-        refreshToken = authHeader.replace(STARTS_WITH_BEARER, "");
-        usernameOrEmail = jwtService.extractUsername(refreshToken);
-        if(usernameOrEmail != null) {
-            var user = findUser(usernameOrEmail);
-
-            if (jwtService.isValid(refreshToken, user)) {
-                String accessToken = jwtService.generateToken(user);
-                revokeAllUserTokens(user);
-                saveToken(accessToken, user);
-                var authResponse = new AuthenticationResponse(
-                   accessToken, refreshToken
-                );
-                new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
-            }
-        }
-
-    }
-
-    private void saveToken(String generatedToken, UserProfile savedUser) {
-        Token token = Token.generateToken(savedUser, generatedToken);
-        tokenRepository.save(token);
-    }
-
-    private void revokeAllUserTokens(UserProfile user) {
-        List<Token> allValidTokens = tokenRepository.findAllValidTokens(user.getId());
-        if(allValidTokens.isEmpty()){
-            return;
-        }
-        allValidTokens.forEach(Token::terminate);
-        tokenRepository.saveAll(allValidTokens);
+        return new AuthenticationResponse(generatedToken);
     }
 
     private UserProfile findUser(String user) {

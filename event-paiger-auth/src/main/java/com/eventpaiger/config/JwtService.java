@@ -1,93 +1,107 @@
 package com.eventpaiger.config;
 
+import com.eventpaiger.authentication.AuthenticationToken;
+import com.eventpaiger.authentication.JwtAuthenticationConverter;
+import com.eventpaiger.authentication.TokenClaims;
 import com.eventpaiger.user.model.UserProfile;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtClaimsSet;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.SecretKey;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.time.Instant;
+import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class JwtService {
 
-    private final RsaKeyProperties rsaKeys;
+    private final JwtEncoder jwtEncoder;
+    private final JwtDecoder jwtDecoder;
     private final long jwtExpiration;
-    private final long refreshTokenTime;
 
-    public JwtService(RsaKeyProperties keyProperties,
-                      @Value("${application.security.jwt.expiration}") long jwtExpiration,
-                      @Value("${application.security.jwt.refresh}") long refreshTokenTime) {
-        this.rsaKeys = keyProperties;
+    public JwtService(JwtEncoder jwtEncoder,
+                      JwtDecoder jwtDecoder,
+                      @Value("${application.security.jwt.expiration}") long jwtExpiration) {
+        this.jwtEncoder = jwtEncoder;
+        this.jwtDecoder = jwtDecoder;
         this.jwtExpiration = jwtExpiration;
-        this.refreshTokenTime = refreshTokenTime;
+    }
+
+    public AuthenticationToken decodeToken(String token){
+        Jwt jwt = jwtDecoder.decode(token);
+        return JwtAuthenticationConverter.convert(jwt);
     }
 
     public String extractUsername(String token){
-        return extractClaim(token, Claims::getSubject);
+        return extractClaim(token, AuthenticationToken::getUsername);
     }
 
-    public <T> T extractClaim(String token, Function<Claims, T> resolver){
-        Claims claims = extractAllClaims(token);
+    public <T> T extractClaim(String token, Function<AuthenticationToken, T> resolver){
+        AuthenticationToken claims = decodeToken(token);
         return resolver.apply(claims);
     }
 
-    public boolean isValid(String token, UserDetails user){
-        String username = extractUsername(token);
-        boolean isUsernameValid = username.equals(user.getUsername());
-        return isUsernameValid && !isTokenExpired(token);
+    public TokenClaims getTokenClaims(AuthenticationToken authenticationToken) {
+        return authenticationToken.getTokenClaims();
     }
 
-    private boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
-    }
-
-    private Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
-    }
-
-    private Claims extractAllClaims(String token){
-        return Jwts.parser()
-                .verifyWith(getSigningKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+    public boolean isTokenExpired(AuthenticationToken token) {
+        return token.getExpirationDate().isBefore(Instant.now());
     }
 
     public String generateToken(UserProfile userProfile){
-        return generateToken(userProfile, new HashMap<>());
+        return buildToken(userProfile, jwtExpiration);
     }
 
-    public String generateToken(UserProfile userProfile, Map<String, Object> extraClaims){
-        return buildToken(userProfile, extraClaims, jwtExpiration);
+    private String buildToken(UserProfile userProfile, long expiration) {
+
+        String authoritiesAndRoles = getAuthoritiesAndRolesToString(userProfile);
+
+        JwtClaimsSet claims = buildJwtClaims(userProfile, expiration, authoritiesAndRoles);
+        return this.jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
     }
 
-    public String generateRefreshToken(UserProfile savedUser) {
-        return buildToken(savedUser, new HashMap<>(), refreshTokenTime);
+    private static String getAuthoritiesAndRolesToString(UserProfile userProfile) {
+        return userProfile.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(" "));
     }
 
-    private String buildToken(UserProfile userProfile,
-                              Map<String, Object> extraClaims,
-                              long expiration) {
-        Date generationDate = new Date(System.currentTimeMillis());
-        return Jwts.builder()
-                .claims().add(extraClaims).and()
-                .subject(userProfile.getUsername())
+    private static JwtClaimsSet buildJwtClaims(UserProfile userProfile, long expiration, String authoritiesAndRoles) {
+        Instant generationDate = Instant.now();
+        boolean eventOrganizerIdString = Optional.ofNullable(userProfile.getEventOrganizerId()).isPresent();
+
+        return eventOrganizerIdString
+                ? buildClaimsForOrganizer(userProfile, expiration, authoritiesAndRoles, generationDate)
+                : buildClaimsForObserver(userProfile, expiration, authoritiesAndRoles, generationDate);
+    }
+
+    private static JwtClaimsSet buildClaimsForOrganizer(UserProfile userProfile, long expiration, String authoritiesAndRoles, Instant generationDate) {
+        return JwtClaimsSet.builder()
+                .issuer("event-pager-auth")
                 .issuedAt(generationDate)
-                .expiration(new Date(generationDate.getTime() + expiration))
-                .signWith(getSigningKey())
-                .compact();
+                .expiresAt(Instant.ofEpochMilli(generationDate.toEpochMilli() + expiration))
+                .subject(userProfile.getUsername())
+                .claim("email", userProfile.getEmail())
+                .claim("event_organizer_id", userProfile.getEventOrganizerId())
+                .claim("scope", authoritiesAndRoles)
+                .build();
     }
 
-    private SecretKey getSigningKey() {
-        byte[] keyBytes = rsaKeys.publicKey().getEncoded();
-        return Keys.hmacShaKeyFor(keyBytes);
+    private static JwtClaimsSet buildClaimsForObserver(UserProfile userProfile, long expiration, String authoritiesAndRoles, Instant generationDate) {
+        return JwtClaimsSet.builder()
+                .issuer("event-pager-auth")
+                .issuedAt(generationDate)
+                .expiresAt(Instant.ofEpochMilli(generationDate.toEpochMilli() + expiration))
+                .subject(userProfile.getUsername())
+                .claim("email", userProfile.getEmail())
+                .claim("scope", authoritiesAndRoles)
+                .build();
     }
-
 }
