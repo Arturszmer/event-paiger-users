@@ -1,12 +1,12 @@
 package com.eventpaiger.config;
 
-import com.eventpaiger.authentication.AuthenticationToken;
-import com.eventpaiger.authentication.TokenClaims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.eventpaiger.auth.AuthenticationToken;
+import org.eventpaiger.auth.TokenClaims;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

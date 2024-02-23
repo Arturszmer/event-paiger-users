@@ -1,4 +1,4 @@
-package com.eventpaiger.authentication;
+package org.eventpaiger.auth;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;

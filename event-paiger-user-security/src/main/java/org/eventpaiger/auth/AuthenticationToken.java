@@ -1,14 +1,12 @@
-package com.eventpaiger.authentication;
+package org.eventpaiger.auth;
 
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 import java.time.Instant;
 
 @Getter
-@Slf4j
 public class AuthenticationToken extends JwtAuthenticationToken {
 
     private final String username;
