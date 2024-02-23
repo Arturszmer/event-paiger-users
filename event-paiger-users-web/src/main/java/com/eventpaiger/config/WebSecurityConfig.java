@@ -1,5 +1,6 @@
 package com.eventpaiger.config;
 
+import com.eventpaiger.authentication.JwtAuthenticationConverter;
 import com.eventpaiger.security.SecurityContextHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -32,6 +33,10 @@ public class WebSecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/v1/**").authenticated()
                         .anyRequest().authenticated())
+                .oauth2ResourceServer(server -> server.jwt(
+                        jwtConfigurer -> jwtConfigurer
+                                .jwtAuthenticationConverter(JwtAuthenticationConverter::convert)
+                ))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)

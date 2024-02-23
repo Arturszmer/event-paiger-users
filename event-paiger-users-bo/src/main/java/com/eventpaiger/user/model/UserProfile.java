@@ -121,4 +121,8 @@ public class UserProfile extends BaseEntity<Long> implements UserDetails {
     public void setNewPassword(String newPassword) {
         password = newPassword;
     }
+
+    public void setEventOrganizerId() {
+        this.eventOrganizerId = UUID.randomUUID();
+    }
 }

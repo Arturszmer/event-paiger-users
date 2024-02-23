@@ -1,5 +1,7 @@
 package com.eventpaiger.config;
 
+import com.eventpaiger.authentication.AuthenticationToken;
+import com.eventpaiger.authentication.TokenClaims;
 import com.eventpaiger.user.repository.TokenRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -10,8 +12,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -24,7 +24,6 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final UserDetailsService userDetailsService;
     private final JwtService jwtService;
     private final TokenRepository tokenRepository;
 
@@ -34,20 +33,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
         final String authHeader = request.getHeader(AUTHORIZATION);
         final String jwtToken;
-        final String usernameOrEmail;
+        final AuthenticationToken authenticationToken;
         if(authHeader == null || !authHeader.startsWith(STARTS_WITH_BEARER)){
             filterChain.doFilter(request, response);
             return;
         }
 
         jwtToken = authHeader.replace(STARTS_WITH_BEARER, "");
-        usernameOrEmail = jwtService.extractUsername(jwtToken);
-        if(usernameOrEmail != null && SecurityContextHolder.getContext().getAuthentication() == null){
-            UserDetails userDetails = userDetailsService.loadUserByUsername(usernameOrEmail);
+        authenticationToken = jwtService.decodeToken(jwtToken);
+        if(authenticationToken != null && SecurityContextHolder.getContext().getAuthentication() == null){
+            TokenClaims principal = jwtService.getTokenClaims(authenticationToken);
 
-            if(jwtService.isValid(jwtToken, userDetails) && isTokenValid(jwtToken)){
+            if(jwtService.isTokenExpired(authenticationToken) && isTokenValid(jwtToken)){
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities()
+                        principal, null, principal.getAuthorities()
                 );
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
