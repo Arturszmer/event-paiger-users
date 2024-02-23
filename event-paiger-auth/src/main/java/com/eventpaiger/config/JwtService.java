@@ -61,9 +61,9 @@ public class JwtService {
 
     private String buildToken(UserProfile userProfile, long expiration) {
 
-        String scope = getAuthoritiesAndRolesToString(userProfile);
+        String authoritiesAndRoles = getAuthoritiesAndRolesToString(userProfile);
 
-        JwtClaimsSet claims = buildJwtClaims(userProfile, expiration, scope);
+        JwtClaimsSet claims = buildJwtClaims(userProfile, expiration, authoritiesAndRoles);
         return this.jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
     }
 
@@ -73,18 +73,35 @@ public class JwtService {
                 .collect(Collectors.joining(" "));
     }
 
-    private static JwtClaimsSet buildJwtClaims(UserProfile userProfile, long expiration, String scope) {
+    private static JwtClaimsSet buildJwtClaims(UserProfile userProfile, long expiration, String authoritiesAndRoles) {
         Instant generationDate = Instant.now();
+        boolean eventOrganizerIdString = Optional.ofNullable(userProfile.getEventOrganizerId()).isPresent();
+
+        return eventOrganizerIdString
+                ? buildClaimsForOrganizer(userProfile, expiration, authoritiesAndRoles, generationDate)
+                : buildClaimsForObserver(userProfile, expiration, authoritiesAndRoles, generationDate);
+    }
+
+    private static JwtClaimsSet buildClaimsForOrganizer(UserProfile userProfile, long expiration, String authoritiesAndRoles, Instant generationDate) {
         return JwtClaimsSet.builder()
                 .issuer("event-pager-auth")
                 .issuedAt(generationDate)
                 .expiresAt(Instant.ofEpochMilli(generationDate.toEpochMilli() + expiration))
                 .subject(userProfile.getUsername())
                 .claim("email", userProfile.getEmail())
-                .claim("event_organizer_id",
-                        Optional.ofNullable(userProfile.getEventOrganizerId().toString())
-                                .orElse("EMPTY"))
-                .claim("scope", scope)
+                .claim("event_organizer_id", userProfile.getEventOrganizerId())
+                .claim("scope", authoritiesAndRoles)
+                .build();
+    }
+
+    private static JwtClaimsSet buildClaimsForObserver(UserProfile userProfile, long expiration, String authoritiesAndRoles, Instant generationDate) {
+        return JwtClaimsSet.builder()
+                .issuer("event-pager-auth")
+                .issuedAt(generationDate)
+                .expiresAt(Instant.ofEpochMilli(generationDate.toEpochMilli() + expiration))
+                .subject(userProfile.getUsername())
+                .claim("email", userProfile.getEmail())
+                .claim("scope", authoritiesAndRoles)
                 .build();
     }
 }

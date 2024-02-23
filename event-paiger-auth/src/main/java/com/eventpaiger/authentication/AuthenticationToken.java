@@ -6,7 +6,6 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 import java.time.Instant;
-import java.util.UUID;
 
 @Getter
 @Slf4j
@@ -14,7 +13,7 @@ public class AuthenticationToken extends JwtAuthenticationToken {
 
     private final String username;
     private final String email;
-    private final UUID eventOrganizerId;
+    private final String eventOrganizerId;
     private final String scope;
 
     AuthenticationToken(Jwt jwt, TokenClaims tokenClaims){
