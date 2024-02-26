@@ -34,5 +34,10 @@ jobs:
        mv private.pem src/main/resources/certs
        mv public.pem src/main/resources/certs
 
+    - name: Verify RSA key files
+      run: |
+        ls -l src/main/resources/certs/
+        cat src/main/resources/certs/public.pem
+
     - name: Build with Maven
       run: mvn clean install
