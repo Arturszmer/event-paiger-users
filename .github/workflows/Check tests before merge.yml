@@ -25,5 +25,14 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
+
+    - name: Create RSA key files
+      run: |
+       echo "${{ secrets.RSA_PRIVATE_KEY }}" > private.pem
+       echo "${{ secrets.RSA_PUBLIC_KEY }}" > public.pem
+       mkdir -p src/main/resources/certs
+       mv private.pem src/main/resources/certs
+       mv public.pem src/main/resources/certs
+
     - name: Build with Maven
-      run: mvn clean install -Pgithub
+      run: mvn clean install
