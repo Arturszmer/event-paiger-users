@@ -34,8 +34,5 @@ jobs:
         mv private.pem target/classes/certs
         mv public.pem target/classes/certs
 
-    - name: Print the test classpath
-      run: mvn dependency:build-classpath -DincludeScope=test
-
     - name: Build with Maven
       run: mvn clean install
