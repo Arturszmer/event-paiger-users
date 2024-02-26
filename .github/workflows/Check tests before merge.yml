@@ -30,16 +30,9 @@ jobs:
       run: |
        echo "${{ secrets.RSA_PRIVATE_KEY }}" > private.pem
        echo "${{ secrets.RSA_PUBLIC_KEY }}" > public.pem
-        mkdir -p src/main/resources/certs
-        mv private.pem src/main/resources/certs
-        mv public.pem src/main/resources/certs
-    - name: Build with Maven without tests
-      run: mvn clean install -DskipTests
+        mkdir -p target/classes/resources/certs
+        mv private.pem target/classes/resources/certs
+        mv public.pem target/classes/resources/certs
 
-    - name: Copy RSA key files to target directory
-      run: |
-        mkdir -p target/classes/certs
-        cp src/main/resources/certs/*.pem target/classes/certs/
-
-    - name: Run tests with Maven
-      run: mvn test -PintegrationTest
+    - name: Build with Maven
+      run: mvn clean install
