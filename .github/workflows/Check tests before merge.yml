@@ -30,14 +30,14 @@ jobs:
       run: |
        echo "${{ secrets.RSA_PRIVATE_KEY }}" > private.pem
        echo "${{ secrets.RSA_PUBLIC_KEY }}" > public.pem
-       mkdir -p src/main/resources/certs
-       mv private.pem src/main/resources/certs
-       mv public.pem src/main/resources/certs
+       mkdir -p src/test/resources/certs
+       mv private.pem src/test/resources/certs
+       mv public.pem src/test/resources/certs
 
     - name: Verify RSA key files
       run: |
-        ls -l src/main/resources/certs/
-        cat src/main/resources/certs/public.pem
+        ls -l src/test/resources/certs/
+        cat src/test/resources/certs/public.pem
 
     - name: Build with Maven
       run: mvn clean install
