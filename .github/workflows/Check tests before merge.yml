@@ -30,9 +30,9 @@ jobs:
       run: |
        echo "${{ secrets.RSA_PRIVATE_KEY }}" > private.pem
        echo "${{ secrets.RSA_PUBLIC_KEY }}" > public.pem
-        mkdir -p target/classes/resources/certs
-        mv private.pem target/classes/resources/certs
-        mv public.pem target/classes/resources/certs
+        mkdir -p target/classes/certs
+        mv private.pem target/classes/certs
+        mv public.pem target/classes/certs
 
     - name: Build with Maven
       run: mvn clean install
