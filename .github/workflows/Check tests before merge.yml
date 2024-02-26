@@ -34,11 +34,5 @@ jobs:
         mv private.pem event-paiger-users-web/src/main/resources/certs
         mv public.pem event-paiger-users-web/src/main/resources/certs
 
-    - name: Verify RSA key files in event-paiger-users-web module
-      run: |
-       ls -l event-paiger-users-web/src/main/resources/certs/
-     # Use cat carefully, only if necessary and safe to do so
-     # cat event-paiger-users-web/src/test/resources/certs/public.pem
-
     - name: Build with Maven
       run: mvn clean install
