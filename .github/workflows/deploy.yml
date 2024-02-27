@@ -42,7 +42,7 @@ jobs:
         port: ${{ secrets.MIKRUS_ACCESS_PORT }}
         script: |
           cd /var/www/event-paiger/event-paiger-users/event-paiger-users-web
-          docker-compose down
+          docker compose down
           rm -f /var/www/event-paiger/event-paiger-users/event-paiger-users-web/*
 
     - name: Prepare files to deploy
