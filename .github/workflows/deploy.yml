@@ -43,14 +43,7 @@ jobs:
         script: |
           cd /var/www/event-paiger/event-paiger-users/event-paiger-users-web
           docker-compose down
-          rm -f /var/www/event-paiger/event-paiger-users/event-paiger-users-web/target/event-paiger-users-web-0.0.1-SNAPSHOT.jar
-          rm -f /var/www/event-paiger/event-paiger-users/event-paiger-users-web/Dockerfile
-          rm -f /var/www/event-paiger/event-paiger-users/event-paiger-users-web/docker-compose.yml
-
-    - name: Check values in directory
-      run: |
-        ls -l ./event-paiger-users-web/target/
-        ls -l ./
+          rm -f /var/www/event-paiger/event-paiger-users/event-paiger-users-web/*
 
     - name: Prepare files to deploy
       run: |
@@ -84,4 +77,4 @@ jobs:
           cd /var/www/event-paiger/event-paiger-users/event-paiger-users-web
           tar -xzvf deploy.tar.gz
           docker build -t event-paiger-users-web . 
-          docker-compose up
+          docker compose up
