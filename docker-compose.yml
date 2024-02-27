@@ -16,7 +16,7 @@ services:
     container_name: event-paiger-users
     image: event-paiger-users-web
     ports:
-      - "31002:31002"
+      - "40482:31002"
     networks:
       - event-paiger-network
     depends_on:
