@@ -77,4 +77,4 @@ jobs:
           cd /var/www/event-paiger/event-paiger-users/event-paiger-users-web
           tar -xzvf deploy.tar.gz
           docker build -t event-paiger-users-web . 
-          docker compose up
+          docker compose up -d
