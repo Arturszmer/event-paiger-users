@@ -12,7 +12,7 @@ public class ClosedFilter {
 
     @GetMapping(value = "/show")
     ResponseEntity<String> showMe(){
-        return ResponseEntity.ok("SHOWED");
+        return ResponseEntity.ok("SHOWED --> VERSION WITH GATEWAY: 2024-02-29 15:40");
     }
 
     @GetMapping("/organizer")
