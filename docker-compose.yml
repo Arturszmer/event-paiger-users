@@ -1,29 +1,11 @@
 services:
-  event-paiger-db:
-    container_name: event-paiger-db-container
-    image: postgres
-    environment:
-      POSTGRES_USER: ep-user
-      POSTGRES_PASSWORD: ep-secret
-      POSTGRES_DB: event-paiger-users
-    ports:
-      - "5432:5432"
-    volumes:
-      - event-paiger-db:/var/lib/postgres/data
-    networks:
-      - event-paiger-network
   event-paiger-app:
     container_name: event-paiger-users
-    image: event-paiger-users-web
+    image: event-paiger-users-image
     ports:
-      - "40482:31002"
+      - "31002:31002"
     networks:
       - event-paiger-network
-    depends_on:
-      - event-paiger-db
-
-volumes:
-  event-paiger-db:
 
 networks:
   event-paiger-network:
