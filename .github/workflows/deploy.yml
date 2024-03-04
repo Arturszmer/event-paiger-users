@@ -76,3 +76,4 @@ jobs:
           tar -xzvf deploy.tar.gz
           docker build -t event-paiger-users-image . 
           docker compose up -d
+          docker rmi $(docker images -f "dangling=true" -q)
