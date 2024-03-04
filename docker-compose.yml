@@ -9,4 +9,4 @@ services:
 
 networks:
   event-paiger-network:
-    driver: bridge
+    external: true
