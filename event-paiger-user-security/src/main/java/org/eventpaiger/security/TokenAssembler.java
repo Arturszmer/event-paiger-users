@@ -1,4 +1,4 @@
-package org.eventpaiger.auth;
+package org.eventpaiger.security;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

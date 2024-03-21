@@ -1,7 +1,7 @@
 package com.eventpaiger.config;
 
 import lombok.RequiredArgsConstructor;
-import org.eventpaiger.auth.JwtAuthenticationConverter;
+import org.eventpaiger.security.JwtAuthenticationConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;

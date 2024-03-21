@@ -1,14 +1,20 @@
 package com.eventpaiger.controller;
 
+import com.eventpaiger.user.service.GeocodingService;
+import com.nimbusds.jose.shaded.gson.JsonObject;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/v1")
+@RequiredArgsConstructor
 public class ClosedFilter {
+
+    private final GeocodingService geocodingService;
 
     @GetMapping(value = "/show")
     ResponseEntity<String> showMe(){
@@ -26,4 +32,24 @@ public class ClosedFilter {
     ResponseEntity<String> createEvent(){
         return ResponseEntity.ok("You are ready to create an events");
     }
+
+    @PostMapping("/geo")
+    ResponseEntity<JsonObject> search(@RequestParam("query") String query){
+        JsonObject location;
+        try {
+            location = geocodingService.search(query);
+            return ResponseEntity.ok(location);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+//    @PostMapping("/geo2")
+//    ResponseEntity<List<EventAddress>> search(@RequestBody NominatinSearchQueryDto query){
+//        try {
+//            return ResponseEntity.ok(geocodingService.search(query));
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
 }

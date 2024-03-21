@@ -1,9 +1,9 @@
 package com.eventpaiger.config;
 
-import com.eventpaiger.user.model.UserProfile;
-import org.eventpaiger.auth.AuthenticationToken;
-import org.eventpaiger.auth.JwtAuthenticationConverter;
-import org.eventpaiger.auth.TokenClaims;
+import com.eventpaiger.user.model.user.UserProfile;
+import org.eventpaiger.security.AuthenticationToken;
+import org.eventpaiger.security.JwtAuthenticationConverter;
+import org.eventpaiger.security.TokenClaims;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;

@@ -1,4 +1,4 @@
-package com.eventpaiger.dto.auth;
+package com.eventpaiger.auth;
 
 public record ChangePasswordRequest(
         String currentPassword,

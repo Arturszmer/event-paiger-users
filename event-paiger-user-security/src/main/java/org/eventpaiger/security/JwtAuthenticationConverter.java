@@ -1,4 +1,4 @@
-package org.eventpaiger.auth;
+package org.eventpaiger.security;
 
 import lombok.AllArgsConstructor;
 import org.springframework.security.oauth2.jwt.Jwt;

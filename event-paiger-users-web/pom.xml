@@ -61,7 +61,7 @@
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>org.eventpaiger</groupId>
+            <groupId>com.eventpaiger</groupId>
             <artifactId>event-paiger-user-security</artifactId>
             <version>0.0.1-SNAPSHOT</version>
             <scope>compile</scope>

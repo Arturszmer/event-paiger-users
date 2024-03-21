@@ -1,16 +1,22 @@
 package com.eventpaiger.user.service;
 
-import com.eventpaiger.dto.auth.ChangePasswordRequest;
-import com.eventpaiger.dto.user.service.UserService;
-import com.eventpaiger.user.model.UserProfile;
+import com.eventpaiger.auth.ChangePasswordRequest;
+import com.eventpaiger.dto.SimpleAddressDto;
+import com.eventpaiger.dto.userprofile.UserProfileDetailsDto;
+import com.eventpaiger.service.UserService;
+import com.eventpaiger.user.assembler.UserProfileAssembler;
+import com.eventpaiger.user.model.user.SimpleAddress;
+import com.eventpaiger.user.model.user.UserProfile;
 import com.eventpaiger.user.repository.UserProfileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.eventpaiger.security.SecurityContextUsers;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +40,40 @@ public class UserServiceImpl implements UserService {
 
         repository.save(user);
         log.info("Password for user: {} has been changed", user.getUsername());
+    }
+
+    @Override
+    public UserProfileDetailsDto updateAddress(SimpleAddressDto userUpdateAddress) {
+        SecurityContextUsers contextHelper = new SecurityContextUsers();
+        String userEmail = contextHelper.getUserEmailFromAuthenticationUser();
+
+        Optional<UserProfile> userOpt = repository.findUserProfileByEmail(userEmail);
+        if(userOpt.isEmpty()){
+            log.error("Token include email which not exist in database!");
+            throw new UsernameNotFoundException("User not found");
+        }
+        UserProfile userProfile = userOpt.get();
+        UserProfile savedUser = updateUserAddressIfIsChanged(userUpdateAddress, userProfile);
+
+        return UserProfileAssembler.toDtoDetails(savedUser);
+    }
+
+    private UserProfile updateUserAddressIfIsChanged(SimpleAddressDto userAddressDto, UserProfile userProfile) {
+        if(userAddressDto == null){
+            return userProfile;
+        }
+        SimpleAddress changedAddress = UserProfileAssembler.toEntity(userAddressDto);
+
+        if(isUserAddressIsReallyChanged(changedAddress, userProfile)){
+            userProfile.setUserAddress(changedAddress);
+            return repository.save(userProfile);
+        }
+
+        return userProfile;
+    }
+
+    private boolean isUserAddressIsReallyChanged(SimpleAddress changedAddress, UserProfile userProfile) {
+        return userProfile.getUserAddress() != null && !userProfile.getUserAddress().equals(changedAddress);
     }
 
     private void isNewPasswordMatches(String newPassword, String confirmationPassword) {

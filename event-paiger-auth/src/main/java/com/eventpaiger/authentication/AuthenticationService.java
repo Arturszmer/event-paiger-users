@@ -1,10 +1,12 @@
 package com.eventpaiger.authentication;
 
 import com.eventpaiger.config.JwtService;
-import com.eventpaiger.dto.auth.AuthenticationRequest;
-import com.eventpaiger.dto.auth.AuthenticationResponse;
-import com.eventpaiger.dto.auth.RegistrationRequest;
-import com.eventpaiger.user.model.*;
+import com.eventpaiger.auth.AuthenticationRequest;
+import com.eventpaiger.auth.AuthenticationResponse;
+import com.eventpaiger.auth.RegistrationRequest;
+import com.eventpaiger.user.model.user.Role;
+import com.eventpaiger.user.model.user.RoleType;
+import com.eventpaiger.user.model.user.UserProfile;
 import com.eventpaiger.user.repository.UserProfileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

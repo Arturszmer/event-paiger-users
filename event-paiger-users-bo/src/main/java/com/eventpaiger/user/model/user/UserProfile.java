@@ -1,17 +1,11 @@
-package com.eventpaiger.user.model;
+package com.eventpaiger.user.model.user;
 
 import com.eventpaiger.common.BaseEntity;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -50,6 +44,10 @@ public class UserProfile extends BaseEntity<Long> implements UserDetails {
                 joinColumns = @JoinColumn(name = "user_profile_id", referencedColumnName = "ID"),
                 inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "ID"))
     private List<Role> roles = new ArrayList<>();
+
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @Setter
+    private SimpleAddress userAddress;
 
     private UserProfile(String username, String email, UUID eventOrganizerId) {
         this.username = username;

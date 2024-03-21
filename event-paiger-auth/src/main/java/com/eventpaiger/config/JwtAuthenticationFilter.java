@@ -5,8 +5,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.eventpaiger.auth.AuthenticationToken;
-import org.eventpaiger.auth.TokenClaims;
+import org.eventpaiger.security.AuthenticationToken;
+import org.eventpaiger.security.TokenClaims;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,7 +16,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-import static com.eventpaiger.dto.auth.AuthConstants.STARTS_WITH_BEARER;
+import static com.eventpaiger.auth.AuthConstants.STARTS_WITH_BEARER;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 @Configuration

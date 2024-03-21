@@ -1,8 +1,8 @@
 package com.eventpaiger.controller;
 
 import com.eventpaiger.BaseIntegrationTestSettings;
-import com.eventpaiger.dto.auth.AuthenticationResponse;
-import com.eventpaiger.dto.auth.RegistrationRequest;
+import com.eventpaiger.auth.AuthenticationResponse;
+import com.eventpaiger.auth.RegistrationRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;

@@ -1,4 +1,4 @@
-package com.eventpaiger.user.model;
+package com.eventpaiger.user.model.user;
 
 import com.eventpaiger.common.BaseEntity;
 import jakarta.persistence.Column;

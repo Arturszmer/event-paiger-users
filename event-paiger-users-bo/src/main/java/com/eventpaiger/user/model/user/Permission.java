@@ -1,4 +1,4 @@
-package com.eventpaiger.user.model;
+package com.eventpaiger.user.model.user;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

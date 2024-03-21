@@ -1,9 +1,9 @@
 package com.eventpaiger.controller;
 
 import com.eventpaiger.authentication.AuthenticationService;
-import com.eventpaiger.dto.auth.AuthenticationRequest;
-import com.eventpaiger.dto.auth.AuthenticationResponse;
-import com.eventpaiger.dto.auth.RegistrationRequest;
+import com.eventpaiger.auth.AuthenticationRequest;
+import com.eventpaiger.auth.AuthenticationResponse;
+import com.eventpaiger.auth.RegistrationRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -1,4 +1,4 @@
-package com.eventpaiger.dto;
+package com.eventpaiger.dto.userprofile;
 
 import java.util.UUID;
 
