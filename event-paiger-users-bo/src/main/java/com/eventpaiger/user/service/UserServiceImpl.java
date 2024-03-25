@@ -10,13 +10,12 @@ import com.eventpaiger.user.model.user.UserProfile;
 import com.eventpaiger.user.repository.UserProfileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.eventpaiger.security.SecurityContextUsers;
+import com.eventpaiger.user.helper.SecurityContextUsers;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +24,7 @@ public class UserServiceImpl implements UserService {
 
     private final PasswordEncoder passwordEncoder;
     private final UserProfileRepository repository;
+    private final SecurityContextUsers securityContextUsers;
 
     @Override
     public void changePassword(ChangePasswordRequest request, Principal principal) {
@@ -44,16 +44,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserProfileDetailsDto updateAddress(SimpleAddressDto userUpdateAddress) {
-        SecurityContextUsers contextHelper = new SecurityContextUsers();
-        String userEmail = contextHelper.getUserEmailFromAuthenticationUser();
 
-        Optional<UserProfile> userOpt = repository.findUserProfileByEmail(userEmail);
-        if(userOpt.isEmpty()){
-            log.error("Token include email which not exist in database!");
-            throw new UsernameNotFoundException("User not found");
-        }
-        UserProfile userProfile = userOpt.get();
-        UserProfile savedUser = updateUserAddressIfIsChanged(userUpdateAddress, userProfile);
+        UserProfile user = securityContextUsers.getUserProfileFromAuthentication();
+        UserProfile savedUser = updateUserAddressIfIsChanged(userUpdateAddress, user);
 
         return UserProfileAssembler.toDtoDetails(savedUser);
     }

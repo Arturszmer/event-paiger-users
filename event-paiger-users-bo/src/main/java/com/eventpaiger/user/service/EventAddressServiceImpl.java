@@ -10,16 +10,18 @@ import com.eventpaiger.user.assembler.UserProfileAssembler;
 import com.eventpaiger.user.model.event.EventAddress;
 import com.eventpaiger.user.model.user.UserProfile;
 import com.eventpaiger.user.repository.EventAddressRepository;
-import com.eventpaiger.user.repository.UserProfileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.eventpaiger.security.SecurityContextUsers;
+import com.eventpaiger.user.helper.SecurityContextUsers;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -28,26 +30,17 @@ public class EventAddressServiceImpl implements EventAddressService {
 
     private final GeocodingService geocodingService;
     private final EventAddressRepository eventAddressRepository;
-    private final UserProfileRepository userProfileRepository;
-//    private final SecurityContextUsers securityContextHelper;
+    private final SecurityContextUsers securityContextHelper;
 
     @Override
     public UserProfileWithEventAddressesDto updateEventAddresses(List<EventAddressDto> updatedAddresses){
-        SecurityContextUsers contextHelper = new SecurityContextUsers();
-        String userEmail = contextHelper.getUserEmailFromAuthenticationUser();
 
-        Optional<UserProfile> userOpt = userProfileRepository.findUserProfileByEmail(userEmail);
-        if(userOpt.isEmpty()){
-            log.error("Token include email which not exist in database!");
-            throw new UsernameNotFoundException("User not found");
-        }
-
-        UserProfile userProfile = userOpt.get();
-        UUID eventOrganizerId = userOpt.get().getEventOrganizerId();
+        UserProfile userProfile = securityContextHelper.getUserProfileFromAuthentication();
+        UUID eventOrganizerId = userProfile.getEventOrganizerId();
 
         Set<String> addressesNames = validEventAddressUniqueness(updatedAddresses);
-        List<EventAddress> allByEventOrganizerId = eventAddressRepository.findAllByEventOrganizerId(eventOrganizerId);
-        if(allByEventOrganizerId.isEmpty()){
+        List<EventAddress> allEventAddresses = eventAddressRepository.findAllByEventOrganizerId(eventOrganizerId);
+        if(allEventAddresses.isEmpty()){
             List<EventAddressDto> list = saveAddresses(eventOrganizerId, updatedAddresses).stream()
                     .map(EventAddressAssembler::toDto)
                     .toList();
@@ -61,14 +54,6 @@ public class EventAddressServiceImpl implements EventAddressService {
         }
     }
 
-    @NotNull
-    private static List<EventAddressDto> removeNotUniqueAddresses(List<EventAddressDto> updatedAddresses, Set<String> addressesNames) {
-        return updatedAddresses.stream()
-                .filter(address -> addressesNames.stream().noneMatch(existAddress ->
-                        address.customUserAddressName().equals(existAddress)))
-                .toList();
-    }
-
     private Set<String> validEventAddressUniqueness(List<EventAddressDto> eventAddressDtos) {
         Set<String> addressesNames = new HashSet<>();
         for(EventAddressDto dto : eventAddressDtos){
@@ -77,6 +62,14 @@ public class EventAddressServiceImpl implements EventAddressService {
             }
         }
         return addressesNames;
+    }
+
+    @NotNull
+    private static List<EventAddressDto> removeNotUniqueAddresses(List<EventAddressDto> updatedAddresses, Set<String> addressesNames) {
+        return updatedAddresses.stream()
+                .filter(address -> addressesNames.stream().noneMatch(existAddress ->
+                        address.customUserAddressName().equals(existAddress)))
+                .toList();
     }
 
     private List<EventAddress> saveAddresses(UUID eventOrganizerId, List<EventAddressDto> eventAddressDtos) {
