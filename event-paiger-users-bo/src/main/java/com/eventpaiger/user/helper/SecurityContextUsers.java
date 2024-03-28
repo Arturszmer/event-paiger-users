@@ -6,8 +6,10 @@ import com.eventpaiger.user.model.user.UserProfile;
 import com.eventpaiger.user.repository.UserProfileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +27,11 @@ public class SecurityContextUsers {
 
         if(authentication instanceof AuthenticationToken token){
             return token.getUsername();
+
+        } else if (authentication instanceof UsernamePasswordAuthenticationToken token){
+            User principal = (User) token.getPrincipal();
+            return principal.getUsername();
+
         } else {
             return "NO USER IN CONTEXT";
         }
@@ -51,11 +58,11 @@ public class SecurityContextUsers {
     }
 
     public UserProfile getUserProfileFromAuthentication(){
-        String userEmail = getUserEmailFromAuthenticationUser();
-        Optional<UserProfile> userProfileByEmail = repository.findUserProfileByEmail(userEmail);
+        String username = getUsernameFromAuthenticatedUser();
+        Optional<UserProfile> userProfileByEmail = repository.findUserProfileByUsername(username);
 
         if(userProfileByEmail.isEmpty()){
-            log.error("WARNING: User with email: {} from authentication is not exists! Contact with admin", userEmail);
+            log.error("WARNING: User with email: {} from authentication is not exists! Contact with admin", username);
             throw new UsernameNotFoundException("User from authentication not found");
         }
 

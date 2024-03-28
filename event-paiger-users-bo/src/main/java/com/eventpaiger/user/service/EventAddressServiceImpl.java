@@ -2,6 +2,7 @@ package com.eventpaiger.user.service;
 
 import com.eventpaiger.dto.EventAddressDto;
 import com.eventpaiger.dto.userprofile.UserProfileWithEventAddressesDto;
+import com.eventpaiger.exception.EventAddressException;
 import com.eventpaiger.openmapsobjects.NominatinSearchQueryDto;
 import com.eventpaiger.openmapsobjects.NominatinSearchResponse;
 import com.eventpaiger.service.EventAddressService;
@@ -14,14 +15,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import com.eventpaiger.user.helper.SecurityContextUsers;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,64 +32,106 @@ public class EventAddressServiceImpl implements EventAddressService {
     private final SecurityContextUsers securityContextHelper;
 
     @Override
-    public UserProfileWithEventAddressesDto updateEventAddresses(List<EventAddressDto> updatedAddresses){
+    public UserProfileWithEventAddressesDto updateEventAddresses(EventAddressDto updatedAddresses){
 
         UserProfile userProfile = securityContextHelper.getUserProfileFromAuthentication();
         UUID eventOrganizerId = userProfile.getEventOrganizerId();
 
-        Set<String> addressesNames = validEventAddressUniqueness(updatedAddresses);
-        List<EventAddress> allEventAddresses = eventAddressRepository.findAllByEventOrganizerId(eventOrganizerId);
-        if(allEventAddresses.isEmpty()){
-            List<EventAddressDto> list = saveAddresses(eventOrganizerId, updatedAddresses).stream()
-                    .map(EventAddressAssembler::toDto)
-                    .toList();
-            return new UserProfileWithEventAddressesDto(UserProfileAssembler.toDto(userProfile), list);
+        List<EventAddress> currentEventAddresses = eventAddressRepository.findAllByEventOrganizerId(eventOrganizerId);
+        if(currentEventAddresses.isEmpty()){
+            EventAddressDto savedAddress = startGeneratingGeocodingAddress(updatedAddresses, eventOrganizerId);
+            return new UserProfileWithEventAddressesDto(UserProfileAssembler.toDto(userProfile),
+                    isEventAddressSavedSuccessfully(savedAddress));
         } else {
-            List<EventAddressDto> newUniqueAddresses = removeNotUniqueAddresses(updatedAddresses, addressesNames);
-            List<EventAddressDto> list = saveAddresses(eventOrganizerId, newUniqueAddresses).stream()
+            Optional<EventAddress> toUpdateOpt = currentEventAddresses.stream()
+                    .filter(addr -> updatedAddresses.customUserAddressName().equals(addr.getCustomUserAddressName()))
+                    .findFirst();
+
+            if(toUpdateOpt.isEmpty()){
+                EventAddressDto eventAddressDto = startGeneratingGeocodingAddress(updatedAddresses, eventOrganizerId); // Zrobić metodę: GenerateNewAddress
+                return new UserProfileWithEventAddressesDto(UserProfileAssembler.toDto(userProfile),
+                        isEventAddressSavedSuccessfully(eventAddressDto));
+            }
+
+            EventAddress toUpdateCurrentAddress = toUpdateOpt.get();
+            // zrobić metodę updateExistingAddress
+            EventAddressDto eventAddressDto = startGeneratingGeocodingAddress(updatedAddresses, toUpdateCurrentAddress);
+
+            List<EventAddressDto> list = currentEventAddresses.stream()
+                    .filter(addr -> !addr.getCustomUserAddressName().equals(eventAddressDto.customUserAddressName()))
                     .map(EventAddressAssembler::toDto)
-                    .toList();
+                    .collect(Collectors.toList());
+            list.add(eventAddressDto);
+
             return new UserProfileWithEventAddressesDto(UserProfileAssembler.toDto(userProfile), list);
         }
     }
 
-    private Set<String> validEventAddressUniqueness(List<EventAddressDto> eventAddressDtos) {
-        Set<String> addressesNames = new HashSet<>();
-        for(EventAddressDto dto : eventAddressDtos){
-            if(!addressesNames.add(dto.customUserAddressName())){
-                throw new IllegalArgumentException("Duplicate address name: " + dto.customUserAddressName());
-            }
+    private EventAddressDto startGeneratingGeocodingAddress(EventAddressDto updatedAddresses, EventAddress toUpdateCurrentAddress) {
+        return saveUpdatedAddress(updatedAddresses, toUpdateCurrentAddress)
+                .map(addr -> EventAddressAssembler.toDto(eventAddressRepository.save(addr)))
+                .orElseGet(() -> {
+                    log.warn("Invalid address: {}", updatedAddresses);
+                    return null;
+                });
+    }
+
+    private Optional<EventAddress> saveUpdatedAddress(EventAddressDto updatedAddresses, EventAddress toUpdateCurrentAddress) {
+
+        try {
+            NominatinSearchResponse nominatinSearchResponse = getNominatinSearchResponse(updatedAddresses);
+            toUpdateCurrentAddress.update(nominatinSearchResponse, updatedAddresses);
+            log.info("Address has been updated successfully, new address {} is: {}",
+                    updatedAddresses.customUserAddressName(), updatedAddresses.addressDto());
+            return Optional.of(toUpdateCurrentAddress);
+        } catch (EventAddressException e){
+            return Optional.empty();
         }
-        return addressesNames;
+
+
+    }
+
+    @Nullable
+    private EventAddressDto startGeneratingGeocodingAddress(EventAddressDto updatedAddresses, UUID eventOrganizerId) {
+        return saveNewAddress(eventOrganizerId, updatedAddresses)
+                .map(addr -> EventAddressAssembler.toDto(eventAddressRepository.save(addr)))
+                .orElseGet(() -> {
+                    log.warn("Invalid address: {}", updatedAddresses);
+                    return null;
+                });
     }
 
     @NotNull
-    private static List<EventAddressDto> removeNotUniqueAddresses(List<EventAddressDto> updatedAddresses, Set<String> addressesNames) {
-        return updatedAddresses.stream()
-                .filter(address -> addressesNames.stream().noneMatch(existAddress ->
-                        address.customUserAddressName().equals(existAddress)))
-                .toList();
+    private static List<EventAddressDto> isEventAddressSavedSuccessfully(EventAddressDto savedAddress) {
+        return savedAddress != null
+                ? List.of(savedAddress)
+                : Collections.emptyList();
     }
 
-    private List<EventAddress> saveAddresses(UUID eventOrganizerId, List<EventAddressDto> eventAddressDtos) {
-        List<EventAddress> geocodedAddresses = eventAddressDtos.stream()
-                .map(dto -> {
-                    NominatinSearchResponse nominatinSearchResponse =
-                            buildFromGeocoding(EventAddressAssembler.toNominatinSearchQueryDto(dto));
+    private Optional<EventAddress> saveNewAddress(UUID eventOrganizerId, EventAddressDto eventAddressDto) {
 
-                    if(nominatinSearchResponse == null || nominatinSearchResponse.getPlaceId() == null) {
-                        log.warn("Invalid address: {}", dto);
-                        return null;
-                    }
-                    log.info("Nomination search successfully, place id: {}", nominatinSearchResponse.getPlaceId());
+        try {
+            NominatinSearchResponse nominatinResponse = getNominatinSearchResponse(eventAddressDto);
+            log.info("Nomination search successfully, place id: {}", nominatinResponse.getPlaceId());
 
-                    return EventAddress.create(dto, eventOrganizerId, nominatinSearchResponse);
-                })
-                .filter(Objects::nonNull)
-                .toList();
-        return eventAddressRepository.saveAll(geocodedAddresses);
+            return Optional.of(EventAddress.create(eventAddressDto, eventOrganizerId, nominatinResponse));
+        } catch (EventAddressException ex){
+            return Optional.empty();
+        }
+
     }
 
+    @NotNull
+    private NominatinSearchResponse getNominatinSearchResponse(EventAddressDto eventAddressDto) {
+        NominatinSearchResponse nominatinResponse = buildFromGeocoding(EventAddressAssembler
+                .toNominatinSearchQueryDto(eventAddressDto));
+
+        if(nominatinResponse == null || nominatinResponse.getPlaceId() == null) {
+            log.warn("Invalid address: {}", eventAddressDto);
+            throw new EventAddressException("Invalid address!");
+        }
+        return nominatinResponse;
+    }
 
 
     private NominatinSearchResponse buildFromGeocoding(NominatinSearchQueryDto address) {

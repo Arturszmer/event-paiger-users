@@ -68,4 +68,14 @@ public class EventAddress extends BaseEntity<Long> {
                         nominatinSearchResponse.getDisplayName(),
                         UserProfileAssembler.toEntity(dto.addressDto()));
         }
+
+        public void update(NominatinSearchResponse nominatinSearchResponse, EventAddressDto updatedAddresses) {
+                setPlaceId(nominatinSearchResponse.getPlaceId());
+                setEventGeolocation(new EventGeolocation(nominatinSearchResponse.getLatitude(), nominatinSearchResponse.getLongitude()));
+                setClassOfPlace(nominatinSearchResponse.getClazz());
+                setType(nominatinSearchResponse.getType());
+                setName(nominatinSearchResponse.getName());
+                setDisplayName(nominatinSearchResponse.getDisplayName());
+                setAddress(UserProfileAssembler.toEntity(updatedAddresses.addressDto()));
+        }
 }

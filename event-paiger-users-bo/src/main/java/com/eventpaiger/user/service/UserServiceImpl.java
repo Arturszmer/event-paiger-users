@@ -66,7 +66,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private boolean isUserAddressIsReallyChanged(SimpleAddress changedAddress, UserProfile userProfile) {
-        return userProfile.getUserAddress() != null && !userProfile.getUserAddress().equals(changedAddress);
+        return userProfile.getUserAddress() == null || !userProfile.getUserAddress().equals(changedAddress);
     }
 
     private void isNewPasswordMatches(String newPassword, String confirmationPassword) {

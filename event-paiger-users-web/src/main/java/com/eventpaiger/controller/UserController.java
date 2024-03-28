@@ -1,14 +1,15 @@
 package com.eventpaiger.controller;
 
+import com.eventpaiger.dto.EventAddressDto;
 import com.eventpaiger.dto.SimpleAddressDto;
 import com.eventpaiger.dto.userprofile.UserProfileDetailsDto;
 import com.eventpaiger.auth.ChangePasswordRequest;
-import com.eventpaiger.dto.UserUpdateEventAddresses;
 import com.eventpaiger.dto.userprofile.UserProfileWithEventAddressesDto;
 import com.eventpaiger.service.EventAddressService;
 import com.eventpaiger.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.attribute.UserPrincipalNotFoundException;
@@ -35,7 +36,7 @@ public class UserController {
     }
 
     @PutMapping("/update-event-address")
-    public ResponseEntity<UserProfileWithEventAddressesDto> updateEventAddresses(@RequestBody UserUpdateEventAddresses eventAddresses){
-        return ResponseEntity.ok(eventAddressService.updateEventAddresses(eventAddresses.organizerAddressesDto()));
+    public ResponseEntity<UserProfileWithEventAddressesDto> updateEventAddresses(@RequestBody @NonNull EventAddressDto eventAddresses){
+        return ResponseEntity.ok(eventAddressService.updateEventAddresses(eventAddresses));
     }
 }
