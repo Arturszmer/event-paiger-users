@@ -61,7 +61,7 @@
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>org.eventpaiger</groupId>
+            <groupId>com.eventpaiger</groupId>
             <artifactId>event-paiger-user-security</artifactId>
             <version>0.0.1-SNAPSHOT</version>
             <scope>compile</scope>
@@ -90,11 +90,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.wiremock</groupId>
-            <artifactId>wiremock</artifactId>
-            <version>3.3.1</version>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock-standalone</artifactId>
+            <version>3.0.1</version>
             <scope>test</scope>
         </dependency>
+
     </dependencies>
     <build>
         <resources>
@@ -110,7 +111,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>3.2.3</version> <!-- Use the appropriate version -->
+                <version>3.2.3</version>
                 <executions>
                     <execution>
                         <goals>

@@ -1,6 +1,6 @@
 package com.eventpaiger.authentication;
 
-import com.eventpaiger.user.model.UserProfile;
+import com.eventpaiger.user.model.user.UserProfile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationProvider;

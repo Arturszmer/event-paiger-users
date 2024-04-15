@@ -5,8 +5,8 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.3</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <version>3.2.4</version>
+        <relativePath/>
     </parent>
     <groupId>com.eventpaiger</groupId>
     <artifactId>event-paiger-users</artifactId>
@@ -25,20 +25,21 @@
     <properties>
         <java.version>17</java.version>
         <lombok.version>1.18.30</lombok.version>
+        <spring-boot-dependency.version>3.2.4</spring-boot-dependency.version>
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
         <owasp-dependency-check-maven.version>8.4.0</owasp-dependency-check-maven.version>
         <maven-surefire-plugin.version>3.1.2</maven-surefire-plugin.version>
         <querydsl.version>5.0.0</querydsl.version>
-        <spring-boot-starter-web.version>3.2.3</spring-boot-starter-web.version>
+        <spring-boot-starter-web.version>3.2.4</spring-boot-starter-web.version>
         <jsonwebtoken.version>0.12.3</jsonwebtoken.version>
-        <spring-cloud.version>2023.0.0</spring-cloud.version>
+        <spring-cloud.version>2023.0.1</spring-cloud.version>
     </properties>
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>3.2.3</version>
+                <version>${spring-boot-dependency.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.projectlombok</groupId>

@@ -1,6 +1,6 @@
 package com.eventpaiger.user.repository;
 
-import com.eventpaiger.user.model.UserProfile;
+import com.eventpaiger.user.model.user.UserProfile;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
